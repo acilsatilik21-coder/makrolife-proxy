@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İlan Detayları | Gayrimenkul Yatırım</title>
+    <!-- Tailwind CSS ve FontAwesome CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- 1. Header (Navbar) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img id="companyLogo" src="logo.png" alt="Logo" class="h-12 w-auto object-contain" onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80'">
+                <span class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block">Gayrimenkul Yatırım</span>
+            </div>
+            <nav class="flex gap-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-900 hover:text-amber-600 transition duration-150">Ana Sayfa</a>
+                <a href="#" class="text-slate-500 hover:text-slate-900 transition duration-150">Hakkımızda</a>
+                <a href="#" class="text-slate-500 hover:text-slate-900 transition duration-150">İletişim</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="text-center py-32">
+        <i class="fa-solid fa-circle-notch animate-spin text-slate-950 text-3xl mb-4"></i>
+        <p class="text-slate-400 text-xs">İlan detayları yükleniyor, lütfen bekleyin...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="text-center py-32 hidden">
+        <i class="fa-solid fa-circle-exclamation text-rose-500 text-5xl mb-4"></i>
+        <h2 class="text-lg font-bold text-slate-900 mb-2">İlan Bulunamadı</h2>
+        <p class="text-slate-500 text-sm mb-6">Aradığınız ilan sistemde bulunamadı veya silinmiş olabilir.</p>
+        <a href="index.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-950 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition">
+            <i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön
+        </a>
+    </div>
+
+    <!-- 2. Main Detail Container -->
+    <main id="detailContainer" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 hidden">
+        
+        <!-- Breadcrumb Navigation -->
+        <nav class="flex items-center gap-2 text-xs font-medium text-slate-400 mb-6">
+            <a href="index.html" class="hover:text-slate-900 transition">Ana Sayfa</a>
+            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            <span id="breadcrumbType" class="capitalize">İlan</span>
+            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+            <span id="breadcrumbTitle" class="text-slate-900 truncate max-w-xs font-semibold">...</span>
+        </nav>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Left Column: Gallery & Description -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                
+                <!-- Image Gallery -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                    <!-- Main Big Image -->
+                    <div class="relative aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden mb-4">
+                        <img id="mainImage" src="" alt="Main Image" class="w-full h-full object-cover">
+                        <span id="badgePropertyType" class="absolute top-4 left-4 bg-white/95 backdrop-blur text-slate-900 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm">...</span>
+                        <span id="badgeProcessType" class="absolute top-4 right-4 bg-slate-900 text-white text-xs font-bold tracking-wider px-3.5 py-1.5 rounded-full shadow-sm uppercase">...</span>
+                    </div>
+                    <!-- Thumbnails Strip -->
+                    <div id="thumbnailsContainer" class="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar">
+                        <!-- Thumbnails added via JS -->
+                    </div>
+                </div>
+
+                <!-- Description & Clarifications -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-slate-900 pb-3 mb-4 border-b border-slate-100 uppercase tracking-wide">Açıklama</h2>
+                    <div id="propertyDescription" class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">
+                        <!-- Description added via JS -->
+                    </div>
+                </div>
+
+                <!-- Google Maps Direction Section -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-slate-900 pb-3 mb-4 border-b border-slate-100 uppercase tracking-wide">Konum ve Harita</h2>
+                    <p class="text-xs text-slate-500 mb-4 flex items-center gap-1.5">
+                        <i class="fa-solid fa-map-marker-alt text-slate-400"></i>
+                        <span id="mapFullAddress">...</span>
+                    </p>
+                    <div class="flex gap-4">
+                        <a id="btnGoogleMaps" href="" target="_blank" class="flex-1 inline-flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl text-sm font-semibold hover:bg-slate-50 transition shadow-sm">
+                            <i class="fa-brands fa-google text-rose-500"></i> Google Haritalar'da Git
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Specs & Contact Card -->
+            <div class="flex flex-col gap-6">
+                
+                <!-- Price and Basic Info -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-semibold mb-3 tracking-wide">
+                        <span>İlan No: <strong id="lblListingId" class="text-slate-800">...</strong></span>
+                        <span id="badgeEids" class="text-emerald-600 hidden"><i class="fa-solid fa-circle-check mr-1"></i>EIDS Aktif</span>
+                    </div>
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span id="lblPrice" class="text-3xl font-extrabold text-slate-950">...</span>
+                        <span class="text-lg font-bold text-slate-900">₺</span>
+                    </div>
+
+                    <!-- Technical Specs List -->
+                    <div class="flex flex-col gap-3.5 text-xs">
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Brüt Alan</span>
+                            <span id="specBrut" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Net Alan</span>
+                            <span id="specNet" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Oda Sayısı</span>
+                            <span id="specRooms" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Banyo Sayısı</span>
+                            <span id="specBathrooms" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Bina Yaşı</span>
+                            <span id="specAge" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Isıtma Tipi</span>
+                            <span id="specHeating" class="font-bold text-slate-900">...</span>
+                        </div>
+                        <div class="flex justify-between pb-3 border-b border-slate-100">
+                            <span class="text-slate-500">Hasar Durumu</span>
+                            <span id="specDamage" class="font-bold text-slate-900">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sorumlu Danışman / Contact Agent (Floating Feel) -->
+                <div class="bg-white border-2 border-slate-900 rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Sorumlu Danışman</h3>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center font-bold text-xl text-slate-700">
+                            <span id="agentInitials">D</span>
+                        </div>
+                        <div>
+                            <h4 id="lblAgentName" class="font-bold text-slate-950 text-base">...</h4>
+                            <p class="text-xs text-slate-500 font-medium">Gayrimenkul Yatırım Uzmanı</p>
+                        </div>
+                    </div>
+
+                    <!-- Direct Communication Buttons -->
+                    <div class="flex flex-col gap-3">
+                        <a id="btnCall" href="" class="w-full inline-flex items-center justify-center gap-2 py-3 bg-slate-950 text-white rounded-xl text-sm font-semibold hover:bg-slate-800 transition shadow-sm">
+                            <i class="fa-solid fa-phone"></i> Hemen Ara
+                        </a>
+                        <a id="btnWhatsapp" href="" target="_blank" class="w-full inline-flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp ile Sor
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- JavaScript - Detay Verilerini Getirme ve Dinamik Yönetim -->
+    <script>
+        const SUPABASE_URL = "رابط_المشروع_الخاص_بك_هنا"; 
+        const SUPABASE_ANON_KEY = "مفتاح_anon_الخاص_بك_هنا";
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // URL parametresinden ilan ID'sini alma
+        const urlParams = new URLSearchParams(window.location.search);
+        const listingId = urlParams.get('id');
+
+        function setMainPhoto(src) {
+            document.getElementById('mainImage').src = src;
+        }
+
+        async function fetchListingDetail() {
+            if (!listingId) {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+                return;
+            }
+
+            try {
+                // listings, agents ve images verilerini tek bir sorguda alma
+                const { data: listing, error } = await supabase
+                    .from('listings')
+                    .select('*, agents(*), images(image_url)')
+                    .eq('id', parseInt(listingId, 10))
+                    .single();
+
+                if (error || !listing) throw error;
+
+                // Üst Başlıklar ve Breadcrumb Güncelleme
+                document.getElementById('breadcrumbTitle').textContent = listing.title;
+                document.getElementById('breadcrumbType').textContent = listing.property_type;
+                document.getElementById('badgePropertyType').textContent = listing.property_type;
+                document.getElementById('badgeProcessType').textContent = listing.process_type;
+                document.title = `${listing.title} | Gayrimenkul Yatırım`;
+
+                // Görsellerin Yüklenmesi
+                const mainImgEl = document.getElementById('mainImage');
+                const thumbsContainer = document.getElementById('thumbnailsContainer');
+                thumbsContainer.innerHTML = '';
+
+                if (listing.images && listing.images.length > 0) {
+                    mainImgEl.src = listing.images[0].image_url;
+                    listing.images.forEach((img, index) => {
+                        const thumbHtml = `
+                            <img src="${img.image_url}" alt="Thumbnail" onclick="setMainPhoto('${img.image_url}')" class="h-16 w-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:border-slate-900 transition flex-shrink-0">
+                        `;
+                        thumbsContainer.innerHTML += thumbHtml;
+                    });
+                } else {
+                    mainImgEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                }
+
+                // Açıklama ve Adres Bilgileri
+                document.getElementById('propertyDescription').textContent = listing.description || 'Açıklama belirtilmemiş.';
+                const fullAddress = `${listing.city || 'Diyarbakır'} / ${listing.district || ''} / ${listing.neighborhood || ''}`;
+                document.getElementById('mapFullAddress').textContent = fullAddress;
+                document.getElementById('btnGoogleMaps').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+
+                // İlan Bilgileri ve Teknik Özellikler
+                document.getElementById('lblListingId').textContent = listing.id;
+                document.getElementById('lblPrice').textContent = new Intl.NumberFormat('tr-TR').format(listing.price);
+                document.getElementById('specBrut').textContent = `${listing.m2 || '0'} m²`;
+                document.getElementById('specNet').textContent = `${listing.net_m2 || '0'} m²`;
+                document.getElementById('specRooms').textContent = listing.rooms || 'N/A';
+                document.getElementById('specBathrooms').textContent = listing.bathrooms || '0';
+                document.getElementById('specAge').textContent = `${listing.building_age || '0'} Yıl`;
+                document.getElementById('specHeating').textContent = listing.heating || 'Belirtilmemiş';
+                document.getElementById('specDamage').textContent = listing.damage_status || 'Belirtilmemiş';
+
+                if (listing.eids_verified) {
+                    document.getElementById('badgeEids').classList.remove('hidden');
+                }
+
+                // Danışman Bilgileri ve İletişim Entegrasyonu
+                if (listing.agents) {
+                    const agent = listing.agents;
+                    document.getElementById('lblAgentName').textContent = agent.name;
+                    document.getElementById('agentInitials').textContent = agent.name.charAt(0);
+                    document.getElementById('btnCall').href = `tel:+${agent.phone}`;
+                    
+                    const wpMessage = encodeURIComponent(`Merhaba, ML-${listing.id} kodlu "${listing.title}" ilanınız hakkında detaylı bilgi alabilir miyim?`);
+                    document.getElementById('btnWhatsapp').href = `https://wa.me/${agent.phone}?text=${wpMessage}`;
+                }
+
+                // Arayüzü Gösterme
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('detailContainer').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Detay bilgisi yüklenemedi:", error.message);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('errorState').classList.remove('hidden');
+            }
+        }
+
+        window.onload = fetchListingDetail;
+    </script>
+</body>
+</html>
