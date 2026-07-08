@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hakkımızda | Güvenilir Gayrimenkul Yatırım</title>
+    <!-- Tailwind CSS ve FontAwesome CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- 1. Header (Navbar) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img id="companyLogo" alt="Logo" class="h-12 w-auto object-contain opacity-0 transition-opacity duration-300">
+                <span id="companyName" class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block opacity-0 transition-opacity duration-300">Gayrimenkul Yatırım</span>
+            </div>
+            <nav class="flex gap-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-500 hover:text-slate-900 transition duration-150">Ana Sayfa</a>
+                <a href="hakkimizda.html" class="text-slate-900 hover:text-amber-600 transition duration-150">Hakkımızda</a>
+                <a href="iletisim.html" class="text-slate-500 hover:text-slate-900 transition duration-150">İletişim</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 2. Hero Section (Hakkımızda Başlığı) -->
+    <section class="relative bg-slate-900 text-white py-24 overflow-hidden">
+        <div class="absolute inset-0 opacity-20">
+            <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80" alt="About Hero" class="w-full h-full object-cover">
+        </div>
+        <div class="relative max-w-5xl mx-auto px-4 sm:px-6 text-center">
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">Geleceğinizi Güvenle İnşa Ediyoruz</h1>
+            <p class="text-slate-300 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">Gayrimenkul sektöründeki yılların getirdiği tecrübe ve güvenle, hayallerinizdeki yaşam alanlarını sizlerle buluşturuyoruz.</p>
+        </div>
+    </section>
+
+    <!-- 3. İçerik ve Hikayemiz (Our Story) -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <span class="text-xs font-bold text-amber-600 uppercase tracking-widest block mb-2">Biz Kimiz?</span>
+                <h2 class="text-2xl font-bold text-slate-950 tracking-tight mb-5">Gayrimenkul Yatırımının Güvenilir Adresi</h2>
+                <div class="text-slate-600 text-sm leading-relaxed flex flex-col gap-4">
+                    <p>Sektöre adım attığımız ilk günden itibaren dürüstlük, şeffaflık ve müşteri memnuniyetini en temel ilkelerimiz olarak kabul ettik. Diyarbakır ve çevre illerde lüks konut, arsa, villa ve ticari mülk arayışında olan müşterilerimize profesyonel danışmanlık hizmeti sunuyoruz.</p>
+                    <p>Her bütçeye ve her ihtiyaca en doğru çözümü sunmak için sürekli güncellenen geniş portföyümüz ve uzman kadromuz ile yatırımlarınızın değer kazanmasını sağlıyoruz. Biz sadece mülk satmıyor, güvenli bir gelecek inşa etmenize yardımcı oluyoruz.</p>
+                </div>
+            </div>
+            <div class="aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                <img src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=800&q=80" alt="Our Story" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <!-- 4. Vizyon & Misyon Kartları -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center text-lg shadow mb-5">
+                    <i class="fa-solid fa-eye"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-950 mb-3">Vizyonumuz</h3>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">Sektörde yenilikçi adımlarla fark yaratan, etik değerlerden ödün vermeyen ve gayrimenkul dendiğinde bölgede akla gelen ilk ve en güvenilir marka olmak.</p>
+            </div>
+            <div class="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shadow mb-5">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-950 mb-3">Misyonumuz</h3>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">Müşterilerimizin ihtiyaçlarını doğru analiz ederek, en doğru gayrimenkul çözümlerini güvenli, hızlı ve şeffaf bir pazarlama süreciyle kendilerine sunmak.</p>
+            </div>
+        </div>
+
+        <!-- 5. İstatistikler (Sayılarla Biz) -->
+        <div class="bg-slate-900 text-white rounded-2xl p-8 shadow-sm grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            <div>
+                <strong class="block text-2xl sm:text-3xl font-extrabold text-amber-500">10+</strong>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Yıllık Tecrübe</span>
+            </div>
+            <div>
+                <strong class="block text-2xl sm:text-3xl font-extrabold text-amber-500">1000+</strong>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Mutlu Müşteri</span>
+            </div>
+            <div>
+                <strong class="block text-2xl sm:text-3xl font-extrabold text-amber-500">500+</strong>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Aktif Portföy</span>
+            </div>
+            <div>
+                <strong class="block text-2xl sm:text-3xl font-extrabold text-amber-500">20+</strong>
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Uzman Danışman</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-400 font-medium">
+        <p>© 2026 <span id="footerCompanyName">Gayrimenkul Yatırım</span>. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <!-- JS - Dinamik Logo ve İsim Güncelleme -->
+    <script>
+        const SUPABASE_URL = "https://vabkxnntjrqrvvjtdcod.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhYmt4bm50anJxcnZ2anRkY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzOTYxODcsImV4cCI6MjA5ODk3MjE4N30.qIt3Y92zHAgyrLAxf2L7PnzOf3AbYlktIQ3mQKN5uPA";
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function initAboutPage() {
+            const logoEl = document.getElementById('companyLogo');
+            const nameEl = document.getElementById('companyName');
+            const footerEl = document.getElementById('footerCompanyName');
+
+            try {
+                const { data: settings } = await supabaseClient.from('settings').select('logo_url, company_name').limit(1);
+                if (settings && settings.length > 0) {
+                    const setting = settings[0];
+                    if (setting.logo_url) logoEl.src = setting.logo_url;
+                    else logoEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80";
+
+                    if (setting.company_name) {
+                        nameEl.textContent = setting.company_name;
+                        footerEl.textContent = setting.company_name;
+                    }
+                }
+            } catch(e) { 
+                console.error(e);
+                logoEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80";
+            } finally {
+                logoEl.classList.remove('opacity-0');
+                nameEl.classList.remove('opacity-0');
+            }
+        }
+
+        window.onload = initAboutPage;
+    </script>
+</body>
+</html>
