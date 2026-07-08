@@ -17,13 +17,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <!-- Şirket Logosu (Dinamik olarak güncellenebilir) -->
-                <img id="companyLogo" src="logo.png" alt="Logo" class="h-12 w-auto object-contain onerror-fallback" onerror="this.src='https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80'">
-                <span class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block">Gayrimenkul Yatırım</span>
+                    <img id="companyLogo" alt="Logo" class="h-12 w-auto object-contain opacity-0 transition-opacity duration-300">
+                        <span id="companyName" class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block opacity-0 transition-opacity duration-300">Gayrimenkul Yatırım</span>
             </div>
             <nav class="flex gap-8 text-sm font-semibold">
-                <a href="#" class="text-slate-900 hover:text-amber-600 transition duration-150">Ana Sayfa</a>
-                <a href="#" class="text-slate-500 hover:text-slate-900 transition duration-150">Hakkımızda</a>
-                <a href="#" class="text-slate-500 hover:text-slate-900 transition duration-150">İletişim</a>
+                <a href="index.html" class="text-slate-900 hover:text-amber-600 transition duration-150">Ana Sayfa</a>
+                <a href="hakkimizda.html" class="text-slate-500 hover:text-slate-900 transition duration-150">Hakkımızda</a>
+                <a href="iletisim.html" class="text-slate-500 hover:text-slate-900 transition duration-150">İletişim</a>
             </nav>
         </div>
     </header>
@@ -127,6 +127,8 @@
             try {
                 // listings, agents ve images tablolarını ilişkilendirerek çekme
                 let query = supabaseClient.from('listings').select('*, agents(*), images(image_url)');
+    // Sadece aktif ilanları getir, arsivlenenleri gizle
+    query = query.eq('status', 'active');
 
                 const keyword = document.getElementById('searchKeyword').value.trim();
                 const processType = document.getElementById('filterProcess').value;
@@ -160,9 +162,14 @@
                 }
 
                 listings.forEach(listing => {
-                    const coverImage = (listing.images && listing.images.length > 0) 
-                        ? listing.images[0].image_url 
-                        : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                        // Kapak fotografi varsa onu kullan, yoksa ilk yuklenen resmi kullan
+    let coverImage = listing.cover_image_url;
+    if (!coverImage && listing.images && listing.images.length > 0) {
+        coverImage = listing.images[0].image_url;
+    }
+    if (!coverImage) {
+        coverImage = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+    }
 
                     const formattedPrice = new Intl.NumberFormat('tr-TR').format(listing.price);
 
@@ -223,7 +230,47 @@
             fetchListings();
         }
 
-        window.onload = fetchListings;
+            // Sayfa yuklenirken hem ilanları hem de sirket logosunu getir
+    async function initPage() {
+        // Sirket ayarlarini ve logosunu yukle
+        try {
+            const { data: settings } = await supabaseClient.from('settings').select('logo_url').limit(1);
+            if (settings && settings.length > 0 && settings[0].logo_url) {
+                document.getElementById('companyLogo').src = settings[0].logo_url;
+            }
+        } catch(e) { console.error(e); }
+
+        // İlanlari getir
+        await fetchListings();
+    }
+
+    // Sirket logosunu yukleyen ve ardindan ilanlari getiren baslatici dâhil edildi
+    async function initPage() {
+        const logoEl = document.getElementById('companyLogo');
+        const nameEl = document.getElementById('companyName');
+        try {
+            // Sirket ayarlarini, ismini ve logosunu yukle
+            const { data: settings } = await supabaseClient.from('settings').select('logo_url, company_name').limit(1);
+            if (settings && settings.length > 0) {
+                const setting = settings[0];
+                if (setting.logo_url) logoEl.src = settings[0].logo_url;
+                if (setting.company_name) nameEl.textContent = setting.company_name;
+            }
+        } catch(e) { 
+            console.error(e);
+        } finally {
+            // Logo ve ismi yumusak bir gecisle gorunur yap
+            logoEl.classList.remove('opacity-0');
+            nameEl.classList.remove('opacity-0'); // bu satir dâhil edildi
+        }
+
+        // İlanlari getir
+        await fetchListings();
+    }
+
+
+
+window.onload = initPage;
     </script>
 </body>
 </html>
