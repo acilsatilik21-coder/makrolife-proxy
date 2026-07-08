@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İletişim | Güvenilir Gayrimenkul Yatırım</title>
+    <!-- Tailwind CSS ve FontAwesome CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- 1. Header (Navbar) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img id="companyLogo" alt="Logo" class="h-12 w-auto object-contain opacity-0 transition-opacity duration-300">
+                <span id="companyName" class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block opacity-0 transition-opacity duration-300">Gayrimenkul Yatırım</span>
+            </div>
+            <nav class="flex gap-8 text-sm font-semibold">
+                <a href="index.html" class="text-slate-500 hover:text-slate-900 transition duration-150">Ana Sayfa</a>
+                <a href="hakkimizda.html" class="text-slate-500 hover:text-slate-900 transition duration-150">Hakkımızda</a>
+                <a href="iletisim.html" class="text-slate-900 hover:text-amber-600 transition duration-150">İletişim</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 2. Main Contact Grid -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+        <div class="text-center mb-12">
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-widest block mb-2">Bize Ulaşın</span>
+            <h1 class="text-3xl font-extrabold text-slate-950 tracking-tight mb-3">Sorularınız İçin Buradayız</h1>
+            <p class="text-slate-500 text-sm max-w-xl mx-auto">Uzman ekibimizle size en doğru gayrimenkul çözümlerini sunmak ve yatırımlarınızı yönlendirmek için hazırız.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Sol Kolon: İletişim Kartları -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <!-- Telefon Kartı -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Müşteri Hattı</h3>
+                        <a id="lnkPhone" href="" class="text-sm font-bold text-slate-900 hover:text-amber-600 transition">...</a>
+                        <p class="text-[10px] text-slate-400 mt-1">Doğrudan arayarak bilgi alabilirsiniz.</p>
+                    </div>
+                </div>
+
+                <!-- WhatsApp Kartı -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm flex-shrink-0">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Hızlı Destek</h3>
+                        <a id="lnkWhatsapp" href="" target="_blank" class="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition">WhatsApp İletişim</a>
+                        <p class="text-[10px] text-slate-400 mt-1">Anlık mesaj ve teklif gönderebilirsiniz.</p>
+                    </div>
+                </div>
+
+                <!-- Adres Kartı -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ofisimiz</h3>
+                        <p id="lblCompanyAddress" class="text-xs font-bold text-slate-900 leading-relaxed">Yenişehir, Diyarbakır, Türkiye</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Yüz yüze görüşmeler için ofisimize bekleriz.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon: Harita ve İletişim Bilgileri (Danışman Entegrasyonu) -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                <!-- Danışman Bilgi Kartı -->
+                <div class="bg-white border-2 border-slate-950 rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div id="agentAvatarContainer" class="w-14 h-14 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center font-bold text-xl text-slate-700">
+                            <span id="agentInitials">D</span>
+                        </div>
+                        <div>
+                            <h3 id="lblAgentName" class="font-bold text-slate-950 text-base">...</h3>
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold mt-0.5">Gayrimenkul Yatırım Uzmanı</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Harita Harici Alanı -->
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm aspect-[16/9] flex flex-col">
+                    <!-- Google Haritalar Embed (Dinamik Koordinat Iframe) -->
+                    <iframe id="companyMapIframe" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <!-- Yol Tarifi Al Butonu (Dinamik Link) -->
+                <a id="btnOfficeDirections" href="" target="_blank" class="inline-flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 text-slate-800 rounded-xl text-xs font-bold hover:bg-slate-50 transition shadow-sm w-full hidden">
+                    <i class="fa-solid fa-route text-rose-500"></i> Yol Tarifi Al (Google Haritalar)
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-400 font-medium mt-12">
+        <p>© 2026 <span id="footerCompanyName">Gayrimenkul Yatırım</span>. Tüm hakları sabıldır.</p>
+    </footer>
+
+    <!-- JS - Dinamik Veri Entegrasyonu -->
+    <script>
+        const SUPABASE_URL = "https://vabkxnntjrqrvvjtdcod.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhYmt4bm50anJxcnZ2anRkY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzOTYxODcsImV4cCI6MjA5ODk3MjE4N30.qIt3Y92zHAgyrLAxf2L7PnzOf3AbYlktIQ3mQKN5uPA";
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function initContactPage() {
+            const logoEl = document.getElementById('companyLogo');
+            const nameEl = document.getElementById('companyName');
+            const footerEl = document.getElementById('footerCompanyName');
+
+            try {
+                // 1. Şirket Ayarlarını Çek (Adres ve Harita bilgileri dahil)
+                const { data: settings } = await supabaseClient.from('settings').select('logo_url, company_name, company_address, map_coordinates, map_link').limit(1);
+                if (settings && settings.length > 0) {
+                    const setting = settings[0];
+                    if (setting.logo_url) logoEl.src = setting.logo_url;
+                    else logoEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80";
+
+                    if (setting.company_name) {
+                        nameEl.textContent = setting.company_name;
+                        footerEl.textContent = setting.company_name;
+                    }
+
+                    // Dinamik Sirket adresi güncelleme
+                    if (setting.company_address) {
+                        document.getElementById('lblCompanyAddress').textContent = setting.company_address;
+                    }
+
+                    // Dinamik Google Map Entegrasyonu (Ucretsiz Koordinat Esleme)
+                    if (setting.map_coordinates) {
+                        const coords = setting.map_coordinates.trim();
+                        document.getElementById('companyMapIframe').src = `https://maps.google.com/maps?q=${encodeURIComponent(coords)}&z=15&output=embed`;
+                    } else {
+                        // Koordinat girilmemisse Diyarbakir varsayilan gosterilir
+                        document.getElementById('companyMapIframe').src = "https://maps.google.com/maps?q=Diyarbakir,Turkiye&z=12&output=embed";
+                    }
+
+                    // Yol Tarifi Al Buton Aktivasyonu
+                    if (setting.map_link) {
+                        const btnDirections = document.getElementById('btnOfficeDirections');
+                        btnDirections.href = setting.map_link;
+                        btnDirections.classList.remove('hidden');
+                    }
+                }
+
+                // 2. Danışman Bilgilerini Çekip İletişimi Dinamik Hale Getirme
+                const { data: agents } = await supabaseClient.from('agents').select('*').limit(1);
+                if (agents && agents.length > 0) {
+                    const agent = agents[0];
+                    
+                    document.getElementById('lblAgentName').textContent = agent.name;
+                    
+                    const cleanPhone = agent.phone.replace(/\s+/g, '');
+                    document.getElementById('lnkPhone').textContent = `${agent.phone}`;
+                    document.getElementById('lnkPhone').href = `tel:+${cleanPhone}`;
+                    
+                    const defaultMessage = encodeURIComponent("Merhaba, web siteniz üzerinden ulaşıyorum. Gayrimenkul portföyünüz hakkında bilgi alabilir miyim?");
+                    document.getElementById('lnkWhatsapp').href = `https://wa.me/${cleanPhone}?text=${defaultMessage}`;
+
+                    // Danışman Avatar Güncelleme
+                    if (agent.avatar_url) {
+                        document.getElementById('agentInitials').classList.add('hidden');
+                        const imgEl = document.createElement('img');
+                        imgEl.src = agent.avatar_url;
+                        imgEl.className = "w-full h-full object-cover rounded-full";
+                        document.getElementById('agentAvatarContainer').innerHTML = '';
+                        document.getElementById('agentAvatarContainer').appendChild(imgEl);
+                    } else {
+                        document.getElementById('agentInitials').textContent = agent.name.charAt(0);
+                    }
+                }
+
+            } catch(e) { 
+                console.error(e);
+                logoEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=120&q=80";
+            } finally {
+                logoEl.classList.remove('opacity-0');
+                nameEl.classList.remove('opacity-0');
+            }
+        }
+
+        window.onload = initContactPage;
+    </script>
+</body>
+</html>
