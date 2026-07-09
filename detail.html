@@ -33,8 +33,8 @@
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                    <img id="companyLogo" alt="Logo" class="h-12 w-auto object-contain opacity-0 transition-opacity duration-300">
-    <span id="companyName" class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block opacity-0 transition-opacity duration-300">Gayrimenkul Yatırım</span>
+                <img id="companyLogo" alt="Logo" class="h-12 w-auto object-contain opacity-0 transition-opacity duration-300">
+                <span id="companyName" class="font-bold text-lg text-slate-900 tracking-tight hidden sm:inline-block opacity-0 transition-opacity duration-300">Gayrimenkul Yatırım</span>
             </div>
             <nav class="flex gap-8 text-sm font-semibold">
                 <a href="index.html" class="text-slate-900 hover:text-amber-600 transition duration-150">Ana Sayfa</a>
@@ -85,9 +85,20 @@
                 
                 <!-- Image Gallery -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-                    <!-- Main Big Image -->
-                    <div class="relative aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden mb-4">
-                        <img id="mainImage" src="" alt="Main Image" class="w-full h-full object-cover">
+                    <!-- Main Big Image wrapper with Navigation Buttons -->
+                    <div class="relative aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden mb-4 group">
+                        <img id="mainImage" src="" alt="Main Image" class="w-full h-full object-cover cursor-zoom-in transition duration-300">
+                        
+                        <!-- Left Navigation Arrow -->
+                        <button id="prevImageBtn" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur hover:bg-white text-slate-900 hover:text-slate-950 w-9 h-9 flex items-center justify-center rounded-full shadow transition-all hidden z-10">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        
+                        <!-- Right Navigation Arrow -->
+                        <button id="nextImageBtn" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur hover:bg-white text-slate-900 hover:text-slate-950 w-9 h-9 flex items-center justify-center rounded-full shadow transition-all hidden z-10">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+
                         <span id="badgePropertyType" class="absolute top-4 left-4 bg-white/95 backdrop-blur text-slate-900 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full shadow-sm">...</span>
                         <span id="badgeProcessType" class="absolute top-4 right-4 bg-slate-900 text-white text-xs font-bold tracking-wider px-3.5 py-1.5 rounded-full shadow-sm uppercase">...</span>
                     </div>
@@ -206,7 +217,44 @@
             </div>
 
         </div>
+
+        <!-- 3. Similar Listings Section (Danışmanın Diğer İlanları) -->
+        <section class="mt-12 border-t border-slate-200 pt-10">
+            <h3 class="text-lg font-bold text-slate-950 mb-6 flex items-center gap-2 uppercase tracking-wide">
+                <i class="fa-solid fa-house-circle-check text-slate-950"></i>
+                <span>Danışmanın Diğer İlanları</span>
+            </h3>
+            <div id="similarListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Benzer İlan Kartları dinamik olarak buraya eklenecektir -->
+            </div>
+            <!-- Sonuç Bulunamadı Mesajı -->
+            <div id="noSimilarListings" class="text-center py-12 border border-dashed border-slate-200 rounded-2xl hidden">
+                <i class="fa-regular fa-folder-open text-slate-300 text-3xl mb-2"></i>
+                <p class="text-slate-400 text-xs">Danışmanın yayında olan başka bir ilanı bulunmamaktadır.</p>
+            </div>
+        </section>
     </main>
+
+    <!-- 4. Lightbox Image Zoom Modal -->
+    <div id="imageLightbox" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <!-- Close Button -->
+        <button id="closeLightbox" class="absolute top-6 right-6 text-white text-3xl hover:text-slate-300 transition z-50">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        
+        <!-- Lightbox Left Navigation -->
+        <button id="lightboxPrev" class="absolute left-6 text-white text-4xl hover:text-slate-300 transition p-4 z-50">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        
+        <!-- Lightbox Right Navigation -->
+        <button id="lightboxNext" class="absolute right-6 text-white text-4xl hover:text-slate-300 transition p-4 z-50">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <!-- Big Displayed Image -->
+        <img id="lightboxImg" class="max-w-[90%] max-h-[85vh] object-contain rounded-lg shadow-2xl transition-transform duration-300" src="" alt="Zoomed Image">
+    </div>
 
     <!-- JavaScript -->
     <script>
@@ -219,23 +267,137 @@
         const listingId = urlParams.get('id');
 
         let rawPhoneNumber = ""; // Kopyalama butonu için temiz numara verisi
+        let imagesArray = [];    // Tüm görsel URL'lerini saklayacak dinamik dizi
+        let currentImageIndex = 0; // Aktif olarak gösterilen görselin dizini
 
-        // Görsel değiştirme fonksiyonu ve aktif görseli çerçeveleme
-        function setMainPhoto(src, clickedImgEl) {
-            document.getElementById('mainImage').src = src;
-            
-            // Tüm küçük resimlerin çerçevelerini sıfırla
+        // Görselleri güncelleme ve aktif olanı vurgulama fonksiyonu
+        function showImage(index) {
+            if (imagesArray.length === 0) return;
+
+            // Sınır aşımı durumlarında başa/sona sarması için döngüsel mantık
+            if (index >= imagesArray.length) index = 0;
+            if (index < 0) index = imagesArray.length - 1;
+
+            currentImageIndex = index;
+            const targetSrc = imagesArray[currentImageIndex];
+
+            // Ana görseli ve varsa lightbox görselini güncelle
+            document.getElementById('mainImage').src = targetSrc;
+            document.getElementById('lightboxImg').src = targetSrc;
+
+            // Küçük görsellerin (Thumbnails) çerçevelerini güncelle
             const allThumbs = document.querySelectorAll('.thumb-item');
-            allThumbs.forEach(thumb => {
-                thumb.className = "thumb-item h-16 w-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:border-slate-900 transition flex-shrink-0";
+            allThumbs.forEach((thumb, idx) => {
+                if (idx === currentImageIndex) {
+                    thumb.className = "thumb-item h-16 w-20 object-cover rounded-lg border-2 border-slate-950 cursor-pointer transition flex-shrink-0";
+                    // Aktif küçük resmi yatay çubukta görünür alana odakla
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    thumb.className = "thumb-item h-16 w-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:border-slate-900 transition flex-shrink-0";
+                }
             });
+        }
 
-            // Tıklanan resmi siyah çerçeve yap
-            if (clickedImgEl) {
-                clickedImgEl.className = "thumb-item h-16 w-20 object-cover rounded-lg border-2 border-slate-950 cursor-pointer transition flex-shrink-0";
+        // Lightbox Modalını Açma
+        function openLightbox() {
+            const lightbox = document.getElementById('imageLightbox');
+            document.getElementById('lightboxImg').src = imagesArray[currentImageIndex];
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        // Lightbox Modalını Kapatma
+        function closeLightbox() {
+            const lightbox = document.getElementById('imageLightbox');
+            lightbox.classList.add('opacity-0');
+            lightbox.addEventListener('transitionend', function handler() {
+                lightbox.classList.add('hidden');
+                lightbox.removeEventListener('transitionend', handler);
+            }, { once: true });
+        }
+
+        // Klavye ile Lightbox Kontrolü (Sol, Sağ ve Esc)
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('imageLightbox');
+            if (!lightbox.classList.contains('hidden')) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowRight') {
+                    showImage(currentImageIndex + 1);
+                } else if (e.key === 'ArrowLeft') {
+                    showImage(currentImageIndex - 1);
+                }
+            }
+        });
+
+        // Danışmanın Diğer Aktif İlanlarını Getirme
+        async function fetchSimilarListings(agentId, currentListingId) {
+            try {
+                const { data: listings, error } = await supabaseClient
+                    .from('listings')
+                    .select('*, images(image_url)')
+                    .eq('agent_id', agentId)
+                    .eq('status', 'active')
+                    .neq('id', parseInt(currentListingId, 10))
+                    .limit(3);
+
+                if (error) throw error;
+
+                const grid = document.getElementById('similarListingsGrid');
+                grid.innerHTML = '';
+
+                if (!listings || listings.length === 0) {
+                    document.getElementById('noSimilarListings').classList.remove('hidden');
+                    return;
+                }
+
+                document.getElementById('noSimilarListings').classList.add('hidden');
+
+                listings.forEach(item => {
+                    let coverImage = item.cover_image_url;
+                    if (!coverImage && item.images && item.images.length > 0) {
+                        coverImage = item.images[0].image_url;
+                    }
+                    if (!coverImage) {
+                        coverImage = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                    }
+
+                    const formattedPrice = new Intl.NumberFormat('tr-TR').format(item.price);
+
+                    const cardHtml = `
+                        <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col">
+                            <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden">
+                                <img src="${coverImage}" alt="${item.title}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                                <span class="absolute top-3 left-3 bg-white/95 backdrop-blur text-slate-900 text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-full shadow-sm uppercase">${item.property_type}</span>
+                                <span class="absolute top-3 right-3 bg-slate-900 text-white text-[10px] font-bold tracking-wider px-3 py-1 rounded-full shadow-sm uppercase">${item.process_type}</span>
+                            </div>
+                            
+                            <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 leading-snug line-clamp-2 text-xs mb-1 h-8">${item.title}</h4>
+                                    <div class="text-[10px] text-slate-500 flex items-center gap-1">
+                                        <i class="fa-solid fa-map-marker-alt text-slate-400"></i>
+                                        <span>${item.city} / ${item.district || ''}</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                                    <span class="text-sm font-extrabold text-slate-900">${formattedPrice} ₺</span>
+                                    <a href="detail.html?id=${item.id}" class="text-[11px] font-bold text-slate-900 hover:text-amber-600 transition duration-150">İncele <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += cardHtml;
+                });
+
+            } catch (error) {
+                console.error("Benzer ilanlar yüklenirken hata oluştu:", error.message);
             }
         }
 
+        // İlan detaylarını getiren ana fonksiyon
         async function fetchListingDetail() {
             if (!listingId) {
                 document.getElementById('loadingState').classList.add('hidden');
@@ -252,52 +414,61 @@
 
                 if (error || !listing) throw error;
 
-                // Verileri Arayüze Ekleme
+                // Temel Bilgilerin Arayüze Eklenmesi
                 document.getElementById('breadcrumbTitle').textContent = listing.title;
                 document.getElementById('breadcrumbType').textContent = listing.property_type;
                 document.getElementById('badgePropertyType').textContent = listing.property_type;
                 document.getElementById('badgeProcessType').textContent = listing.process_type;
                 document.title = `${listing.title} | Gayrimenkul Yatırım`;
 
-                // Görsel Yapılandırması ve Event Dinleyicileri
-                const mainImgEl = document.getElementById('mainImage');
+                // Görsel Yapılandırması ve Diziye Aktarma
+                imagesArray = [];
+                if (listing.cover_image_url) {
+                    imagesArray.push(listing.cover_image_url);
+                }
+                if (listing.images && listing.images.length > 0) {
+                    listing.images.forEach(img => {
+                        if (!imagesArray.includes(img.image_url)) {
+                            imagesArray.push(img.image_url);
+                        }
+                    });
+                }
+                if (imagesArray.length === 0) {
+                    imagesArray.push("https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80");
+                }
+
+                // Küçük Görselleri (Thumbnails) Ekleme
                 const thumbsContainer = document.getElementById('thumbnailsContainer');
                 thumbsContainer.innerHTML = '';
+                
+                imagesArray.forEach((url, index) => {
+                    const imgEl = document.createElement('img');
+                    imgEl.src = url;
+                    imgEl.alt = `Thumbnail ${index + 1}`;
+                    imgEl.className = "thumb-item h-16 w-20 object-cover rounded-lg border border-slate-200 cursor-pointer transition flex-shrink-0";
+                    imgEl.onclick = function() {
+                        showImage(index);
+                    };
+                    thumbsContainer.appendChild(imgEl);
+                });
 
-                    // Kapak fotografi kontrolu
-    if (listing.cover_image_url) {
-        mainImgEl.src = listing.cover_image_url;
-    } else if (listing.images && listing.images.length > 0) {
-        mainImgEl.src = listing.images[0].image_url;
-    } else {
-        mainImgEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
-    }
-
-    if (listing.images && listing.images.length > 0) {
-        thumbsContainer.innerHTML = '';
-                    
-                    listing.images.forEach((img, index) => {
-                        const isActive = index === 0;
-                        const borderClass = isActive ? "border-2 border-slate-950" : "border-slate-200 hover:border-slate-900";
-                        
-                        const imgEl = document.createElement('img');
-                        imgEl.src = img.image_url;
-                        imgEl.alt = "Thumbnail";
-                        imgEl.className = `thumb-item h-16 w-20 object-cover rounded-lg ${borderClass} cursor-pointer transition flex-shrink-0`;
-                        imgEl.onclick = function() {
-                            setMainPhoto(img.image_url, this);
-                        };
-                        
-                        thumbsContainer.appendChild(imgEl);
-                    });
+                // Görsel geçiş butonlarının kontrolü
+                if (imagesArray.length > 1) {
+                    document.getElementById('prevImageBtn').classList.remove('hidden');
+                    document.getElementById('nextImageBtn').classList.remove('hidden');
                 } else {
-                    mainImgEl.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80";
+                    document.getElementById('prevImageBtn').classList.add('hidden');
+                    document.getElementById('nextImageBtn').classList.add('hidden');
                 }
+
+                // Varsayılan olarak ilk görseli göster
+                showImage(0);
 
                 // Açıklama ve Adres Bilgisi
                 document.getElementById('propertyDescription').textContent = listing.description || 'Açıklama belirtilmemiş.';
                 const fullAddress = `${listing.city || 'Diyarbakır'} / ${listing.district || ''} / ${listing.neighborhood || ''}`;
                 document.getElementById('mapFullAddress').textContent = fullAddress;
+
                 // Dinamik Harita Iframe Entegrasyonu
                 if (listing.map_coordinates) {
                     const coords = listing.map_coordinates.trim();
@@ -305,14 +476,14 @@
                     document.getElementById('listingMapWrapper').classList.remove('hidden');
                 }
 
-                // Yol Tarifi ve Google Maps butonu baglantisi
+                // Yol Tarifi ve Google Maps butonu bağlantısı
                 if (listing.map_link) {
                     document.getElementById('btnGoogleMaps').href = listing.map_link;
                 } else {
                     document.getElementById('btnGoogleMaps').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
                 }
 
-                // İlan Bilgileri
+                // İlan Teknik Detayları
                 document.getElementById('lblListingId').textContent = listing.id;
                 document.getElementById('lblPrice').textContent = new Intl.NumberFormat('tr-TR').format(listing.price);
                 document.getElementById('specBrut').textContent = `${listing.m2 || '0'} m²`;
@@ -329,20 +500,20 @@
 
                 // Danışman Bilgileri ve İletişim Entegrasyonları
                 if (listing.agents) {
-    const agent = listing.agents;
-    document.getElementById('lblAgentName').textContent = agent.name;
-    
-    // Profil resmi varsa avatar olarak yukle, yoksa bas harfi goster
-    if (agent.avatar_url) {
-        document.getElementById('agentInitials').classList.add('hidden');
-        const imgEl = document.createElement('img');
-        imgEl.src = agent.avatar_url;
-        imgEl.className = "w-full h-full object-cover rounded-full";
-        document.getElementById('agentAvatarContainer').innerHTML = '';
-        document.getElementById('agentAvatarContainer').appendChild(imgEl);
-    } else {
-        document.getElementById('agentInitials').textContent = agent.name.charAt(0);
-    }
+                    const agent = listing.agents;
+                    document.getElementById('lblAgentName').textContent = agent.name;
+                    
+                    // Profil resmi varsa avatar olarak yükle, yoksa baş harfi göster
+                    if (agent.avatar_url) {
+                        document.getElementById('agentInitials').classList.add('hidden');
+                        const imgEl = document.createElement('img');
+                        imgEl.src = agent.avatar_url;
+                        imgEl.className = "w-full h-full object-cover rounded-full";
+                        document.getElementById('agentAvatarContainer').innerHTML = '';
+                        document.getElementById('agentAvatarContainer').appendChild(imgEl);
+                    } else {
+                        document.getElementById('agentInitials').textContent = agent.name.charAt(0);
+                    }
                     
                     // Telefon Numarası Formatı Temizleme (Boşluksuz tel linki için)
                     rawPhoneNumber = agent.phone.replace(/\s+/g, '');
@@ -351,6 +522,9 @@
                     document.getElementById('btnCall').href = `tel:+${rawPhoneNumber}`;
                     const wpMessage = encodeURIComponent(`Merhaba, ML-${listing.id} kodlu "${listing.title}" ilanınız hakkında detaylı bilgi alabilir miyim?`);
                     document.getElementById('btnWhatsapp').href = `https://wa.me/${rawPhoneNumber}?text=${wpMessage}`;
+
+                    // Danışmana ait benzer diğer ilanları getir
+                    await fetchSimilarListings(agent.id, listing.id);
                 }
 
                 // Arayüzü Aktif Etme
@@ -368,11 +542,9 @@
         document.getElementById('btnCopyPhone').addEventListener('click', async () => {
             if (!rawPhoneNumber) return;
             try {
-                // Clipboard API ile kopyalama
                 await navigator.clipboard.writeText(`${rawPhoneNumber}`);
                 const btnText = document.getElementById('btnCopyText');
                 
-                // Başarı durumunda geçici görsel bildirim
                 btnText.textContent = "Kopyalandı!";
                 setTimeout(() => {
                     btnText.textContent = "Numarayı Kopyala";
@@ -382,45 +554,61 @@
             }
         });
 
-            // Sayfa yuklenirken hem detaylari hem de sirket logosunu getir
-    async function initDetailPage() {
-        // Sirket ayarlarini ve logosunu yukle
-        try {
-            const { data: settings } = await supabaseClient.from('settings').select('logo_url').limit(1);
-            if (settings && settings.length > 0 && settings[0].logo_url) {
-                document.getElementById('companyLogo').src = settings[0].logo_url;
+        // Sayfa yüklenirken hem detayları hem de şirket logosunu getiren tek başlatıcı
+        async function initDetailPage() {
+            const logoEl = document.getElementById('companyLogo');
+            const nameEl = document.getElementById('companyName');
+            try {
+                // Şirket ayarlarını, ismini ve logosunu yükle
+                const { data: settings } = await supabaseClient.from('settings').select('logo_url, company_name').limit(1);
+                if (settings && settings.length > 0) {
+                    const setting = settings[0];
+                    if (setting.logo_url) logoEl.src = setting.logo_url;
+                    if (setting.company_name) nameEl.textContent = setting.company_name;
+                }
+            } catch(e) { 
+                console.error(e);
+            } finally {
+                // Logo ve ismi yumuşak bir geçişle görünür yap
+                logoEl.classList.remove('opacity-0');
+                nameEl.classList.remove('opacity-0');
             }
-        } catch(e) { console.error(e); }
 
-        // İlan detaylarini getir
-        await fetchListingDetail();
-    }
-
-    // Sirket logosunu yukleyen ve ardindan detaylari getiren baslatici dâhil edildi
-    async function initDetailPage() {
-        const logoEl = document.getElementById('companyLogo');
-        const nameEl = document.getElementById('companyName');
-        try {
-            // Sirket ayarlarini, ismini ve logosunu yukle
-            const { data: settings } = await supabaseClient.from('settings').select('logo_url, company_name').limit(1);
-            if (settings && settings.length > 0) {
-                const setting = settings[0];
-                if (setting.logo_url) logoEl.src = settings[0].logo_url;
-                if (setting.company_name) nameEl.textContent = setting.company_name;
-            }
-        } catch(e) { 
-            console.error(e);
-        } finally {
-            // Logo ve ismi yumusak bir gecisle gorunur yap
-            logoEl.classList.remove('opacity-0');
-            nameEl.classList.remove('opacity-0'); // bu satir dâhil edildi
+            // İlan detaylarını getir
+            await fetchListingDetail();
         }
 
-    // İlan detaylarini getir
-    await fetchListingDetail();
-}
+        // Ana görsel üzerine tıklanma olayını (Lightbox Açma) yakala
+        document.getElementById('mainImage').addEventListener('click', openLightbox);
 
-            // Paylaşım ve Bağlantı Kopyalama Süreci (Web Share API Entegrasyonu)
+        // Lightbox dışındaki alan veya Kapat butonuna basıldığında kapatma
+        document.getElementById('imageLightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'imageLightbox' || e.target.closest('#closeLightbox')) {
+                closeLightbox();
+            }
+        });
+
+        // Görsel üzerindeki ok yönlendirmeleri (Ana Panel için)
+        document.getElementById('prevImageBtn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Zoom modunu tetiklememesi için durdurun
+            showImage(currentImageIndex - 1);
+        });
+        document.getElementById('nextImageBtn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Zoom modunu tetiklememesi için durdurun
+            showImage(currentImageIndex + 1);
+        });
+
+        // Lightbox üzerindeki ok yönlendirmeleri (Tam Ekran için)
+        document.getElementById('lightboxPrev').addEventListener('click', (e) => {
+            e.stopPropagation();
+            showImage(currentImageIndex - 1);
+        });
+        document.getElementById('lightboxNext').addEventListener('click', (e) => {
+            e.stopPropagation();
+            showImage(currentImageIndex + 1);
+        });
+
+        // Paylaşım ve Bağlantı Kopyalama Süreci (Web Share API Entegrasyonu)
         document.getElementById('btnShare').addEventListener('click', async () => {
             const shareTitle = document.title;
             const shareText = `${document.getElementById('breadcrumbTitle').textContent} - İlanı inceleyin!`;
@@ -429,7 +617,6 @@
             const btnText = document.getElementById('btnShareText');
 
             try {
-                // Mobil cihazlarda yerel paylaşım penceresini açar
                 if (navigator.share) {
                     await navigator.share({
                         title: shareTitle,
@@ -437,7 +624,6 @@
                         url: shareUrl
                     });
                 } else {
-                    // Bilgisayarlarda bağlantıyı kopyalar ve geçici bildirim verir
                     await navigator.clipboard.writeText(shareUrl);
                     btnText.textContent = "Bağlantı Kopyalandı!";
                     setTimeout(() => {
